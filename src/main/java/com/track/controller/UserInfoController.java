@@ -65,18 +65,20 @@ public class UserInfoController {
 	    if(openIdJson.containsKey("openid")){
 	    	String openid=openIdJson.getString("openid");
 	    	JSONObject userinfo = paramsJson.getJSONObject("userInfo");
-	    	UserInfoEntity user=new UserInfoEntity();
-	    	user.setOpenid(openid);
-	    	String nickname = userinfo.getString("nickName");
-	    	try {
-				user.setNickname(new String(nickname.getBytes("iso8859-1"),"utf-8"));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    	user.setAvatarUrl(userinfo.getString("avatarUrl"));
-	    	user.setRole(0);
-	    	userInfoService.save(user);
+	    	UserInfoEntity uInfo = userInfoService.findById(openid);
+	    	if(uInfo==null){
+	    		UserInfoEntity user=new UserInfoEntity();
+	    		user.setRole(0);
+	    		user.setOpenid(openid);
+	    		user.setNickname(userinfo.getString("nickName"));
+		    	userInfoService.save(user);
+	    	}
+	    	else{
+	    		uInfo.setNickname(userinfo.getString("nickName"));
+		    	uInfo.setAvatarUrl(userinfo.getString("avatarUrl"));
+		    	userInfoService.save(uInfo);
+	    	}
+	    	
 	    	return ApiResult.success(userInfoService.findRoleInfo(openid));
 	    }
 	    else{
